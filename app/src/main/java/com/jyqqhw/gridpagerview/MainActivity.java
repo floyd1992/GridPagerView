@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private SimpleGridView simpleGridView;
+    private GridPagerView gridPagerView;
     private List<String> lists = new ArrayList<String>();
 
     @Override
@@ -26,15 +26,15 @@ public class MainActivity extends Activity {
     }
 
     private void initData(){
-        for(int i=0; i<6; i++){
+        for(int i=0; i<28; i++){
             lists.add("棒棒哒 "+i);
         }
     }
 
     private void initView(){
-        simpleGridView = (SimpleGridView) findViewById(R.id.simple_grid_view);
+        gridPagerView = (GridPagerView) findViewById(R.id.simple_grid_view);
         MyAdapter myAdapter = new MyAdapter(this, lists);
-        simpleGridView.setAdapter(myAdapter);
+        gridPagerView.setAdapter(myAdapter);
     }
 
 
