@@ -7,6 +7,4 @@ import android.widget.ListAdapter;
  */
 public interface BasicAdapter extends ListAdapter {
 
-
-
 }

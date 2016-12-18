@@ -50,6 +50,22 @@ public class MainActivity extends Activity {
                 return false;
             }
         });
+        gridPagerView.setOnPageChangeListener(new CustomLinearLayout.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Toast.makeText(MainActivity.this, "current page is "+position, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
 

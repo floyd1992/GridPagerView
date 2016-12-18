@@ -37,6 +37,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private OnItemClickListener onItemClickListener;
 	private OnItemLongClickListener onItemLongClickListener;
+	private OnPageChangeListener onPageChangeListener;
 
 	public GridPagerView(Context context) {
 		super(context);
@@ -179,10 +180,11 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		return true;
 	}
 
-	private int currentPage;
+	private int currentPage, lastPage;
 	private int totalPage;
 
 	private void resumeToPage(){
+		lastPage = currentPage;
 		int halfW = (int) (getWidth()/3.5);
 		if(diffX + halfW < 0){
 			if( currentPage < totalPage-1){
@@ -204,9 +206,12 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			//恢复到当前页.
 		}
 		smoothScrollToX(currentPage*getWidth());
+		if(null != onPageChangeListener && currentPage!=lastPage){
+			onPageChangeListener.onPageSelected(currentPage);
+		}
 		Log.d("wj","ready to resume"+currentPage*getWidth());
 	}
-
+	
 	private void smoothScrollToX(int finalX){
 		int cx = getScrollX();
 		scroller.startScroll(cx, 0, finalX - cx, 0, ANIMATOR_DURATION);
@@ -323,6 +328,13 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			});
 		}
 	}
+
+	public void setOnPageChangeListener(OnPageChangeListener listener){
+		this.onPageChangeListener = listener;
+	}
+
+
+
 
 
 
