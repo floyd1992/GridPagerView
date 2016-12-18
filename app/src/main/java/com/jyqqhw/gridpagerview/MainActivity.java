@@ -11,12 +11,15 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jyqqhw.gridpagerview.indicator.GridPagerIndicator;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
 
     private GridPagerView gridPagerView;
+    private GridPagerIndicator gridPagerIndicator;
     private List<String> lists = new ArrayList<String>();
 
     @Override
@@ -66,6 +69,12 @@ public class MainActivity extends Activity {
 
             }
         });
+
+
+        gridPagerIndicator = (GridPagerIndicator) findViewById(R.id.simple_indicator);
+        gridPagerIndicator.setGridPagerView(gridPagerView);
+
+
     }
 
 

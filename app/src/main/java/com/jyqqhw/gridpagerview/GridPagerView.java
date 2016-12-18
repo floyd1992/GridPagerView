@@ -14,6 +14,9 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by wj on 16-12-17.
  */
@@ -23,6 +26,12 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private int columnNum = 4;
 	private int rowNum = 2;
+
+	private int standardWidth, standardHeight;
+	private int paddingTop, paddingBottom, paddingLeft, paddingRight;
+
+	private int currentPage, lastPage;
+	private int totalPage;
 
 	private int itemCount;
 
@@ -37,7 +46,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private OnItemClickListener onItemClickListener;
 	private OnItemLongClickListener onItemLongClickListener;
-	private OnPageChangeListener onPageChangeListener;
+	private List<OnPageChangeListener> onPageChangeListeners = new ArrayList<OnPageChangeListener>();
 
 	public GridPagerView(Context context) {
 		super(context);
@@ -180,9 +189,6 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		return true;
 	}
 
-	private int currentPage, lastPage;
-	private int totalPage;
-
 	private void resumeToPage(){
 		lastPage = currentPage;
 		int halfW = (int) (getWidth()/3.5);
@@ -206,12 +212,13 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			//恢复到当前页.
 		}
 		smoothScrollToX(currentPage*getWidth());
-		if(null != onPageChangeListener && currentPage!=lastPage){
-			onPageChangeListener.onPageSelected(currentPage);
+
+		if(currentPage!=lastPage){
+			dispatchPageChangeEvent();
 		}
 		Log.d("wj","ready to resume"+currentPage*getWidth());
 	}
-	
+
 	private void smoothScrollToX(int finalX){
 		int cx = getScrollX();
 		scroller.startScroll(cx, 0, finalX - cx, 0, ANIMATOR_DURATION);
@@ -252,9 +259,6 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			initItemEvents(v, i);
 		}
 	}
-
-	private int standardWidth, standardHeight;
-	private int paddingTop, paddingBottom, paddingLeft, paddingRight;
 
 	private void resizeViewToStandard(){
 //		standardWidth = 100;
@@ -330,12 +334,19 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	}
 
 	public void setOnPageChangeListener(OnPageChangeListener listener){
-		this.onPageChangeListener = listener;
+		if(null != listener){
+			onPageChangeListeners.add(listener);
+		}
 	}
 
+	private void dispatchPageChangeEvent(){
+		for(OnPageChangeListener l: onPageChangeListeners){
+			l.onPageSelected(currentPage);
+		}
+	}
 
-
-
-
+	public int getPageCount(){
+		return totalPage;
+	}
 
 }
