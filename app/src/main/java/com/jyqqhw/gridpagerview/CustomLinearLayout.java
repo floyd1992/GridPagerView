@@ -2,6 +2,7 @@ package com.jyqqhw.gridpagerview;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 
 /**
@@ -29,6 +30,16 @@ public abstract class CustomLinearLayout<ListAdapter> extends LinearLayout {
 
 	public ListAdapter getAdapter() {
 		return adapter;
+	}
+
+
+	public interface OnItemClickListener{
+		void onItemClick(CustomLinearLayout<?> parent, View view, int position, long id);
+	}
+
+
+	public interface OnItemLongClickListener{
+		boolean onItemLongClick(CustomLinearLayout<?> parent, View view, int position, long id);
 	}
 
 }

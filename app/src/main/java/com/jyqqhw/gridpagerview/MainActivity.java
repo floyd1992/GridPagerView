@@ -3,11 +3,13 @@ package com.jyqqhw.gridpagerview;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,19 @@ public class MainActivity extends Activity {
         gridPagerView = (GridPagerView) findViewById(R.id.simple_grid_view);
         MyAdapter myAdapter = new MyAdapter(this, lists);
         gridPagerView.setAdapter(myAdapter);
+        gridPagerView.setOnItemClickListener(new CustomLinearLayout.OnItemClickListener() {
+            @Override
+            public void onItemClick(CustomLinearLayout<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "click item "+position, Toast.LENGTH_SHORT).show();
+            }
+        });
+        gridPagerView.setOnItemLongClickListener(new CustomLinearLayout.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(CustomLinearLayout<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "long click item "+ position, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
     }
 
 

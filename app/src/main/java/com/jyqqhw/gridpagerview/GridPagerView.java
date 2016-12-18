@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.LinearInterpolator;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
@@ -33,6 +34,9 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private LongSparseArray<View> itemViews = new LongSparseArray<View>();
 	private LongSparseArray<Rect> itemLocations = new LongSparseArray<Rect>();
+
+	private OnItemClickListener onItemClickListener;
+	private OnItemLongClickListener onItemLongClickListener;
 
 	public GridPagerView(Context context) {
 		super(context);
@@ -58,6 +62,12 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+		if(itemViews.size()>0){
+			View v = itemViews.get(0);
+			standardWidth = v.getMeasuredWidth();
+			standardHeight = v.getMeasuredHeight();
+		}
 
 //		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 //		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -118,7 +128,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 				downX = (int) ev.getX();
 				downY = (int) ev.getY();
 				Log.i("wj","on intercept down "+touchSlop);
-				return true;
+				break;
 			case MotionEvent.ACTION_MOVE:
 				cX = (int) ev.getX();
 				cY = (int) ev.getY();
@@ -225,7 +235,6 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}
 		mAdapter = adapter;
 		int cnt = mAdapter.getCount();
-
 		resizeViewToStandard();
 		LayoutParams lp = generateDefaultLayoutParams();
 		lp.width = standardWidth;
@@ -233,8 +242,9 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		for(int i=0; i<cnt; i++){
 			View v = mAdapter.getView(i, null, this);
 			itemViews.put(i, v);
-			addView(v, lp);
-			v.setBackgroundColor(Color.BLUE);
+//			addView(v, lp);
+			addView(v);
+			initItemEvents(v, i);
 		}
 	}
 
@@ -242,8 +252,8 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	private int paddingTop, paddingBottom, paddingLeft, paddingRight;
 
 	private void resizeViewToStandard(){
-		standardWidth = 130;
-		standardHeight = 160;
+//		standardWidth = 100;
+//		standardHeight = 100;
 		paddingLeft = 5;
 		paddingTop = 10;
 		paddingRight = 5;
@@ -252,8 +262,6 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private void computeChildPosition(){
 		resizeViewToStandard();
-		int width = getMeasuredWidth();
-		int height = getMeasuredHeight();
 		int widthExtra = paddingLeft+paddingRight;
 		int heightExtra = paddingTop+paddingBottom;
 		int deltaX=0, deltaY=0;
@@ -268,6 +276,51 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			}
 			deltaY+=heightExtra+standardHeight;
 			deltaX = 0;
+		}
+	}
+
+	public void setOnItemClickListener(OnItemClickListener listener){
+		this.onItemClickListener = listener;
+	}
+
+	public void setOnItemLongClickListener(OnItemLongClickListener listener){
+		this.onItemLongClickListener = listener;
+	}
+
+
+	private void initItemEvents(View v, int position){
+		long id = mAdapter.getItemId(position);
+		setItemViewClickListener(v, position, id);
+		setItemViewLongClickListener(v, position, id);
+	}
+
+	private void setItemViewClickListener(final View target, final int position, final long id){
+		if(null != target){
+			target.setTag(position);
+			target.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if(null != onItemClickListener){
+						onItemClickListener.onItemClick(GridPagerView.this, target, position, id);
+					}
+				}
+			});
+		}
+	}
+
+	private void setItemViewLongClickListener(final View target, final int position, final long id){
+		if(null != target){
+			target.setTag(position);
+			target.setOnLongClickListener(new OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					if(null != onItemLongClickListener){
+						onItemLongClickListener.onItemLongClick(GridPagerView.this, target, position, id);
+						return true;
+					}
+					return false;
+				}
+			});
 		}
 	}
 

@@ -8,8 +8,8 @@
     <com.jyqqhw.gridpagerview.GridPagerView
         android:layout_centerInParent="true"
         android:id="@+id/simple_grid_view"
-        android:layout_width="290dp"
-        android:layout_height="200dp"
+        android:layout_width="490dp"
+        android:layout_height="347dp"
         android:background="#0a0"
         >
     </com.jyqqhw.gridpagerview.GridPagerView>
