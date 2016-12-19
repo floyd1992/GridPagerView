@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,9 @@ public class MainActivity extends Activity {
     private GridPagerView gridPagerView;
     private GridPagerIndicator gridPagerIndicator;
     private List<String> lists = new ArrayList<String>();
+    private MyAdapter myAdapter;
+
+    private Button addData, delData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,7 @@ public class MainActivity extends Activity {
 
     private void initView(){
         gridPagerView = (GridPagerView) findViewById(R.id.simple_grid_view);
-        MyAdapter myAdapter = new MyAdapter(this, lists);
+        myAdapter = new MyAdapter(this, lists);
         gridPagerView.setAdapter(myAdapter);
         gridPagerView.setOnItemClickListener(new CustomLinearLayout.OnItemClickListener() {
             @Override
@@ -65,16 +69,42 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageDataSetChanged(boolean changed, int position) {
 
             }
+
         });
-
-
         gridPagerIndicator = (GridPagerIndicator) findViewById(R.id.simple_indicator);
         gridPagerIndicator.setGridPagerView(gridPagerView);
 
 
+        addData = (Button) findViewById(R.id.add_data);
+        delData = (Button) findViewById(R.id.del_data);
+        MyClickListener myClickListener = new MyClickListener();
+        addData.setOnClickListener(myClickListener);
+        delData.setOnClickListener(myClickListener);
+    }
+
+
+    class MyClickListener implements View.OnClickListener{
+        @Override
+        public void onClick(View v) {
+
+            switch (v.getId()){
+                case R.id.add_data:
+                    lists.add("12345");
+                    myAdapter.notifyDataSetChanged();
+                    break;
+                case R.id.del_data:
+                    if(lists.size()>0){
+                        lists.remove(0);
+                        myAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
 

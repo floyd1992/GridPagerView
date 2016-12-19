@@ -147,7 +147,7 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 				public void run() {
 					initIndicator();
 				}
-			}, 500);
+			}, 300);
 		}
 	}
 
@@ -174,7 +174,11 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 	}
 
 	@Override
-	public void onPageScrollStateChanged(int state) {
-
+	public void onPageDataSetChanged(boolean changed, int position) {
+		if(changed){
+			currentPage = position;
+			initIndicator();
+		}
 	}
+
 }

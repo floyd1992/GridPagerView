@@ -1,7 +1,6 @@
 package com.jyqqhw.gridpagerview;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -10,7 +9,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.LinearInterpolator;
-import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
@@ -21,6 +19,10 @@ import java.util.List;
  * Created by wj on 16-12-17.
  */
 public class GridPagerView extends CustomLinearLayout<ListAdapter> {
+
+
+	private static final int TYPE_PAGE_CHANGED = 1;
+	private static final int TYPE_DATA_CHANGED = 2;
 
 	private static final int ANIMATOR_DURATION = 250;
 
@@ -33,11 +35,8 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	private int currentPage, lastPage;
 	private int totalPage;
 
-	private int itemCount;
-
 	private int viewWidth, viewHeight;
 
-	private ListAdapter mAdapter;
 	private int touchSlop;
 	private Scroller scroller;
 
@@ -211,10 +210,11 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}else{
 			//恢复到当前页.
 		}
+
 		smoothScrollToX(currentPage*getWidth());
 
 		if(currentPage!=lastPage){
-			dispatchPageChangeEvent();
+			dispatchPageChangeEvent(TYPE_PAGE_CHANGED);
 		}
 		Log.d("wj","ready to resume"+currentPage*getWidth());
 	}
@@ -245,18 +245,29 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		if(null == adapter){
 			return;
 		}
-		mAdapter = adapter;
+		super.setAdapter(adapter);
+		refreshGridView();
+	}
+
+	private void refreshGridView(){
 		int cnt = mAdapter.getCount();
-		resizeViewToStandard();
-		LayoutParams lp = generateDefaultLayoutParams();
-		lp.width = standardWidth;
-		lp.height = standardHeight;
-		for(int i=0; i<cnt; i++){
-			View v = mAdapter.getView(i, null, this);
-			itemViews.put(i, v);
+		if(cnt != itemCount){
+			itemViews.clear();
+			removeAllViews();
+
+			resizeViewToStandard();
+			LayoutParams lp = generateDefaultLayoutParams();
+			lp.width = standardWidth;
+			lp.height = standardHeight;
+			for(int i=0; i<cnt; i++){
+				View v = mAdapter.getView(i, null, this);
+				itemViews.put(i, v);
 //			addView(v, lp);
-			addView(v);
-			initItemEvents(v, i);
+				addView(v);
+				initItemEvents(v, i);
+			}
+			itemCount = cnt;
+			requestLayout();
 		}
 	}
 
@@ -339,9 +350,16 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}
 	}
 
-	private void dispatchPageChangeEvent(){
-		for(OnPageChangeListener l: onPageChangeListeners){
-			l.onPageSelected(currentPage);
+	private void dispatchPageChangeEvent(int type){
+		if(TYPE_PAGE_CHANGED == type){
+			for(OnPageChangeListener l : onPageChangeListeners){
+				l.onPageSelected(currentPage);
+			}
+		}
+		if( TYPE_DATA_CHANGED == type ) {
+			for(OnPageChangeListener l : onPageChangeListeners){
+				l.onPageDataSetChanged(true, currentPage);
+			}
 		}
 	}
 
@@ -349,4 +367,23 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		return totalPage;
 	}
 
+	private void checkPageValid(){
+		if(currentPage >= totalPage){
+			currentPage = totalPage - 1;
+		}
+		smoothScrollToX(currentPage*getWidth());
+	}
+
+	@Override
+	public void handleTraversal() {
+		super.handleTraversal();
+		refreshGridView();
+		postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				checkPageValid();
+				dispatchPageChangeEvent(TYPE_DATA_CHANGED);
+			}
+		}, 300);
+	}
 }
