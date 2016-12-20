@@ -1,4 +1,4 @@
-package com.jyqqhw.gridpagerview.indicator;
+package com.jyqqhw.gridpagerview.resolver;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -8,14 +8,12 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.jyqqhw.gridpagerview.CustomLinearLayout;
-import com.jyqqhw.gridpagerview.GridPagerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by wj on 16-12-18.
+ * @hide
  */
 public class GridPagerIndicator extends View implements CustomLinearLayout.OnPageChangeListener {
 
@@ -60,6 +58,8 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+//		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
 
@@ -77,6 +77,10 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 	}
 
 	private void drawIndicator(Canvas canvas){
+		if(null==indicShapes || indicShapes.size() ==1){
+			setVisibility(INVISIBLE);
+			return;
+		}
 		Rect rect = new Rect(drawRect);
 		rect.top += paddingTop;
 		rect.bottom -= paddingBottom;
@@ -85,9 +89,9 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 			rect.right = rect.left + shape.getWidth();
 			shape.setRect(rect);
 			if(c == currentPage){
-				shape.drawSelf(canvas, selectedPaint);
+				shape.drawSelfSelected(canvas);
 			}else{
-				shape.drawSelf(canvas, unSelectedPaint);
+				shape.drawSelfUnselected(canvas);
 			}
 			rect.left = rect.right + indicatorGap;
 			c++;
@@ -118,11 +122,12 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 			drawRect.top = rH/2;
 			drawRect.bottom = viewHeight - rH/2;
 		}else{
+//			drawRect.top = 0;
+//			drawRect.bottom = viewHeight;
 			throw new IllegalArgumentException("there is no enough height space..");
 		}
 
 	}
-
 
 	private void initIndicator(){
 		int pc = gridPagerView.getPageCount();
@@ -133,6 +138,9 @@ public class GridPagerIndicator extends View implements CustomLinearLayout.OnPag
 				indicShapes.add(indicShape);
 			}
 			calculateDrawingRegion();
+			if(getVisibility()!=VISIBLE && 2==pc&& 1== indicatorCnt){
+				setVisibility(VISIBLE);
+			}
 			indicatorCnt = pc;
 		}
 		invalidate();

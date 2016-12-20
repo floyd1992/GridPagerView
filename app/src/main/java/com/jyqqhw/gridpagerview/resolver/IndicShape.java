@@ -1,4 +1,4 @@
-package com.jyqqhw.gridpagerview.indicator;
+package com.jyqqhw.gridpagerview.resolver;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,10 +7,11 @@ import android.graphics.Rect;
 
 /**
  * Created by wj on 16-12-18.
+ * @hide
  */
 public abstract class IndicShape {
 
-	protected Paint paint;
+	protected Paint selectedPaint, unselectedPaint;
 
 	protected Rect rect;
 
@@ -34,14 +35,22 @@ public abstract class IndicShape {
 
 	private void init(){
 		rect = new Rect();
-		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		paint.setColor(Color.GREEN);
-		paint.setStrokeWidth(2);
+		selectedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		selectedPaint.setColor(Color.GREEN);
+		selectedPaint.setStrokeWidth(2);
+
+		unselectedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		unselectedPaint.setColor(Color.GRAY);
+		unselectedPaint.setStrokeWidth(2);
 	}
 
 	public abstract void drawSelf(Canvas canvas);
 
-	public void drawSelf(Canvas canvas, Paint paint){
+	public void drawSelfSelected(Canvas canvas){
+
+	}
+
+	public void drawSelfUnselected(Canvas canvas){
 
 	}
 

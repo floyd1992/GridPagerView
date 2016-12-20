@@ -1,4 +1,4 @@
-package com.jyqqhw.gridpagerview;
+package com.jyqqhw.gridpagerview.resolver;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -9,6 +9,7 @@ import android.widget.ListAdapter;
 
 /**
  * Created by wj on 16-12-17.
+ * @hide
  */
 public abstract class CustomLinearLayout<T extends ListAdapter> extends LinearLayout {
 

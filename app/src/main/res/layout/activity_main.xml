@@ -23,21 +23,30 @@
 
     </LinearLayout>
 
-    <com.jyqqhw.gridpagerview.GridPagerView
-        android:layout_centerInParent="true"
-        android:id="@+id/simple_grid_view"
-        android:layout_width="490dp"
-        android:layout_height="347dp"
-        android:background="#0a0"
-    >
-    </com.jyqqhw.gridpagerview.GridPagerView>
+    <FrameLayout android:layout_width="490dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true">
 
-    <com.jyqqhw.gridpagerview.indicator.GridPagerIndicator
-        android:id="@+id/simple_indicator"
-        android:layout_width="490dp"
-        android:layout_height="30dp"
-        android:layout_below="@id/simple_grid_view"
-        android:layout_alignLeft="@id/simple_grid_view"
-        android:background="#dd0"/>
+
+        <com.jyqqhw.gridpagerview.resolver.GridPagerView
+            android:id="@+id/simple_grid_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#0a0"
+        >
+        </com.jyqqhw.gridpagerview.resolver.GridPagerView>
+
+        <com.jyqqhw.gridpagerview.resolver.GridPagerIndicator
+            android:id="@+id/simple_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="#dd0"/>
+
+
+    </FrameLayout>
+
+
+
 
 </RelativeLayout>

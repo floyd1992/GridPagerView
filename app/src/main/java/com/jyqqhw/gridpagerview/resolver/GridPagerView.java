@@ -1,4 +1,4 @@
-package com.jyqqhw.gridpagerview;
+package com.jyqqhw.gridpagerview.resolver;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -17,9 +17,9 @@ import java.util.List;
 
 /**
  * Created by wj on 16-12-17.
+ * @hide
  */
 public class GridPagerView extends CustomLinearLayout<ListAdapter> {
-
 
 	private static final int TYPE_PAGE_CHANGED = 1;
 	private static final int TYPE_DATA_CHANGED = 2;
@@ -31,6 +31,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private int standardWidth, standardHeight;
 	private int paddingTop, paddingBottom, paddingLeft, paddingRight;
+	private int itemHorizontalGap, itemVerticalGap;
 
 	private int currentPage, lastPage;
 	private int totalPage;
@@ -71,12 +72,18 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
+		int heightSize = 0;
 		if(itemViews.size()>0){
 			View v = itemViews.get(0);
 			standardWidth = v.getMeasuredWidth();
 			standardHeight = v.getMeasuredHeight();
 		}
+		if(itemViews.size() > 4){
+			heightSize = 2*standardHeight + paddingTop+itemVerticalGap+ paddingBottom;
+		}else{
+			heightSize = standardHeight+paddingTop+paddingBottom;
+		}
+		setMeasuredDimension(widthMeasureSpec, MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY));
 
 //		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 //		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -257,13 +264,15 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 			resizeViewToStandard();
 			LayoutParams lp = generateDefaultLayoutParams();
-			lp.width = standardWidth;
-			lp.height = standardHeight;
+			lp.width = -2;
+			lp.height = -2;
+//			lp.width = standardWidth;
+//			lp.height = standardHeight;
 			for(int i=0; i<cnt; i++){
 				View v = mAdapter.getView(i, null, this);
 				itemViews.put(i, v);
-//			addView(v, lp);
-				addView(v);
+			addView(v, lp);
+//				addView(v);
 				initItemEvents(v, i);
 			}
 			itemCount = cnt;
@@ -272,12 +281,13 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	}
 
 	private void resizeViewToStandard(){
-//		standardWidth = 100;
-//		standardHeight = 100;
-		paddingLeft = 5;
-		paddingTop = 10;
-		paddingRight = 5;
-		paddingBottom = 10;
+
+		paddingRight = 20;
+		paddingBottom = 17;
+		itemHorizontalGap = 48;
+		itemVerticalGap = 16;
+		paddingLeft = (getMeasuredWidth() - (itemHorizontalGap+standardWidth)*columnNum+itemHorizontalGap)/2;
+		paddingTop = (getMeasuredHeight() - (itemVerticalGap+standardHeight)*rowNum+itemVerticalGap)/2;
 	}
 
 	private void computeChildPosition(){
@@ -285,17 +295,22 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		int widthExtra = paddingLeft+paddingRight;
 		int heightExtra = paddingTop+paddingBottom;
 		int deltaX=0, deltaY=0;
+		itemLocations.clear();
 		for(int i=0;i<rowNum; i++){
 			for(int j=0;j<columnNum;j++){
 				Rect rect = new Rect();
-				rect.left = deltaX+=widthExtra;
-				rect.top = deltaY+heightExtra;
-				rect.right = deltaX += standardWidth;
-				rect.bottom = deltaY + standardHeight;
+				rect.left = paddingLeft + (standardWidth+itemHorizontalGap)*j;
+				rect.top = paddingTop + (standardHeight+itemVerticalGap)*i;
+				rect.right = rect.left + standardWidth;
+				rect.bottom = rect.top + standardHeight;
+
+//				rect.top = deltaY+heightExtra;
+//				rect.right = deltaX += standardWidth;
+//				rect.bottom = deltaY + standardHeight;
 				itemLocations.put(j+i*columnNum, rect);
 			}
-			deltaY+=heightExtra+standardHeight;
-			deltaX = 0;
+//			deltaY+=heightExtra+standardHeight;
+//			deltaX = 0;
 		}
 	}
 

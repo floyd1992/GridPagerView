@@ -3,16 +3,18 @@ package com.jyqqhw.gridpagerview;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jyqqhw.gridpagerview.indicator.GridPagerIndicator;
+import com.jyqqhw.gridpagerview.resolver.CustomLinearLayout;
+import com.jyqqhw.gridpagerview.resolver.GridPagerIndicator;
+import com.jyqqhw.gridpagerview.resolver.GridPagerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         initData();
         initView();
@@ -47,13 +50,17 @@ public class MainActivity extends Activity {
         gridPagerView.setOnItemClickListener(new CustomLinearLayout.OnItemClickListener() {
             @Override
             public void onItemClick(CustomLinearLayout<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "click item "+position, Toast.LENGTH_SHORT).show();
+                TextView textView = (TextView) view.findViewById(R.id.item_text);
+                String txt = textView.getText().toString();
+                Toast.makeText(MainActivity.this, "click item "+position+", text="+txt, Toast.LENGTH_SHORT).show();
             }
         });
         gridPagerView.setOnItemLongClickListener(new CustomLinearLayout.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(CustomLinearLayout<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "long click item "+ position, Toast.LENGTH_SHORT).show();
+                TextView textView = (TextView) view.findViewById(R.id.item_text);
+                String txt = textView.getText().toString();
+                Toast.makeText(MainActivity.this, "long click item "+ position+", text="+txt, Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -77,7 +84,6 @@ public class MainActivity extends Activity {
         gridPagerIndicator = (GridPagerIndicator) findViewById(R.id.simple_indicator);
         gridPagerIndicator.setGridPagerView(gridPagerView);
 
-
         addData = (Button) findViewById(R.id.add_data);
         delData = (Button) findViewById(R.id.del_data);
         MyClickListener myClickListener = new MyClickListener();
@@ -92,7 +98,7 @@ public class MainActivity extends Activity {
 
             switch (v.getId()){
                 case R.id.add_data:
-                    lists.add("12345");
+                    lists.add("12345反击的卡拉基督教发");
                     myAdapter.notifyDataSetChanged();
                     break;
                 case R.id.del_data:
@@ -141,7 +147,7 @@ public class MainActivity extends Activity {
             ViewHolder viewHolder;
             if(null == convertView){
                 viewHolder = new ViewHolder();
-                convertView = layoutInflater.inflate(R.layout.layout_item_1, null);
+                convertView = layoutInflater.inflate(R.layout.layout_item_1, parent, false);
                 viewHolder.textView = (TextView) convertView.findViewById(R.id.item_text);
                 convertView.setTag(viewHolder);
             }else{
