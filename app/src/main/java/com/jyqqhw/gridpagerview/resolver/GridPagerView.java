@@ -78,10 +78,12 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			standardWidth = v.getMeasuredWidth();
 			standardHeight = v.getMeasuredHeight();
 		}
-		if(itemViews.size() > 4){
+		if(itemViews.size() > columnNum){
 			heightSize = 2*standardHeight + paddingTop+itemVerticalGap+ paddingBottom;
+			rowNum = 2;
 		}else{
 			heightSize = standardHeight+paddingTop+paddingBottom;
+			rowNum = 1;
 		}
 		setMeasuredDimension(widthMeasureSpec, MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY));
 
@@ -131,7 +133,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}
 	}
 
-	private int downX, downY;
+	private int downX, downY, initX, initY;
 	private int cX, cY;
 	private int diffX, diffY;
 
@@ -141,23 +143,24 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		int action = ev.getActionMasked();
 		switch (action){
 			case MotionEvent.ACTION_DOWN:
-				downX = (int) ev.getX();
-				downY = (int) ev.getY();
+				pointerId = ev.getPointerId(0);
+				initX = downX = (int) ev.getX();
+				initY = downY = (int) ev.getY();
 				Log.i("wj","on intercept down "+touchSlop);
 				break;
 			case MotionEvent.ACTION_MOVE:
-				cX = (int) ev.getX();
-				cY = (int) ev.getY();
+				int p = ev.findPointerIndex(pointerId);
+				cX = (int) ev.getX(p);
+				cY = (int) ev.getY(p);
 				int diffX = cX - downX;
 				Log.i("wj","on intercept move not intercept "+diffX+", cX="+cX+". downX="+downX);
 
 				if( Math.abs(diffX) > touchSlop ){
-					downX = (int) ev.getX();
-					downY = (int) ev.getY();
+					initX = downX = (int) ev.getX(p);
+					initY = downY = (int) ev.getY(p);
 					Log.i("wj","on intercept move ");
 					return true;
 				}
-
 				break;
 			case MotionEvent.ACTION_UP:
 				break;
@@ -168,18 +171,22 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		return super.onInterceptTouchEvent(ev);
 	}
 
+	private int pointerIndex, pointerId;
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		int action = event.getActionMasked();
 		switch (action){
 			case MotionEvent.ACTION_DOWN:
-				downX = (int) event.getX();
-				downY = (int) event.getY();
+				pointerId = event.getPointerId(0);
+				initX = downX = (int) event.getX();
+				initY = downY = (int) event.getY();
 				Log.i("wj","on touch down ");
 				break;
 			case MotionEvent.ACTION_MOVE:
-				cX = (int) event.getX();
-				cY = (int) event.getY();
+				int p = event.findPointerIndex(pointerId);
+				cX = (int) event.getX(p);
+				cY = (int) event.getY(p);
 				diffX = cX - downX;
 				if( Math.abs(diffX) > 1 ){
 					scrollTo(currentPage*getWidth()-diffX, 0);
@@ -189,11 +196,31 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			case MotionEvent.ACTION_UP:
 				resumeToPage();
 				break;
+			case MotionEvent.ACTION_POINTER_UP:
+				onPointerUp(event);
+				break;
 			default:
 				break;
 		}
 		return true;
 	}
+
+	private void onPointerUp(MotionEvent ev){
+		int index = ev.getActionIndex();
+		int pi = ev.getPointerId(index);
+		if(pointerId == pi){
+			pointerIndex = index==0?1:0;
+			pointerId = ev.getPointerId(pointerIndex);
+			int x = (int) ev.getX(pointerIndex);
+			int y = (int) ev.getY(pointerIndex);
+			cY = y;
+			cX = x;
+			downX = cX - diffX;
+			downY = cY - diffY;
+		}
+
+	}
+
 
 	private void resumeToPage(){
 		lastPage = currentPage;
