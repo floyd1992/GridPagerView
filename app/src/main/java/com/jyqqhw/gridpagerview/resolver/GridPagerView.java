@@ -224,26 +224,26 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private void resumeToPage(){
 		lastPage = currentPage;
+		int cp = diffX / getWidth();
+		if(cp!= 0){
+			currentPage -= cp;
+			diffX %= getWidth();
+		}
+		Log.d("wj","cp="+cp+", diffX="+diffX);
 		int halfW = (int) (getWidth()/3.5);
-		if(diffX + halfW < 0){
-			if( currentPage < totalPage-1){
-				currentPage++;
-			}else{
-				//恢复到当前尾页.
-			}
+		if(currentPage >= totalPage-1){
+			currentPage = totalPage-1;
+		}else if(currentPage <=0){
+			currentPage = 0;
 		}else{
-			//恢复到当前页.
+			if(diffX + halfW < 0){
+				currentPage++;
+			}
+			if( diffX - halfW > 0) {
+				currentPage--;
+			}
 		}
 
-		if( diffX - halfW > 0){
-			if(currentPage>0){
-				currentPage--;
-			}else{
-				//恢复到当前首页.
-			}
-		}else{
-			//恢复到当前页.
-		}
 
 		smoothScrollToX(currentPage*getWidth());
 
@@ -298,7 +298,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			for(int i=0; i<cnt; i++){
 				View v = mAdapter.getView(i, null, this);
 				itemViews.put(i, v);
-			addView(v, lp);
+				addView(v, lp);
 //				addView(v);
 				initItemEvents(v, i);
 			}
