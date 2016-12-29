@@ -1,12 +1,16 @@
 package com.jyqqhw.gridpagerview;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,6 +39,43 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         initData();
         initView();
+
+        initDialog();
+    }
+
+
+    private void initDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("我是标题");
+        builder.setMessage("我是内容");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+
+    public Point test(int width, int height){
+
+        String packageName = this.getPackageName();
+        if( packageName.contains("bbk")|| packageName.contains("eebbk") ||
+                packageName.equals("com.android.systemui") ||
+                packageName.equals("com.android.camera2") ||
+                packageName.equals("com.android.settings") ) {
+        } else {
+
+        }
+
+        return new Point(width, height);
     }
 
     private void initData(){

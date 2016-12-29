@@ -40,8 +40,7 @@
             android:id="@+id/simple_indicator"
             android:layout_width="match_parent"
             android:layout_height="18dp"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="#dd0"/>
+            android:layout_gravity="bottom|center_horizontal" />
 
 
     </FrameLayout>

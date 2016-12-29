@@ -17,9 +17,12 @@ import java.util.List;
 
 /**
  * Created by wj on 16-12-17.
+ *
  * @hide
  */
 public class GridPagerView extends CustomLinearLayout<ListAdapter> {
+
+	private static final String TAG = "GridPagerView";
 
 	private static final int TYPE_PAGE_CHANGED = 1;
 	private static final int TYPE_DATA_CHANGED = 2;
@@ -63,7 +66,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		init(context);
 	}
 
-	private void init(Context context){
+	private void init(Context context) {
 		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		scroller = new Scroller(context, new LinearInterpolator());
 	}
@@ -73,32 +76,19 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		int heightSize = 0;
-		if(itemViews.size()>0){
+		if (itemViews.size() > 0) {
 			View v = itemViews.get(0);
 			standardWidth = v.getMeasuredWidth();
 			standardHeight = v.getMeasuredHeight();
 		}
-		if(itemViews.size() > columnNum){
-			heightSize = 2*standardHeight + paddingTop+itemVerticalGap+ paddingBottom;
+		if (itemViews.size() > columnNum) {
+			heightSize = 2 * standardHeight + paddingTop + itemVerticalGap + paddingBottom;
 			rowNum = 2;
-		}else{
-			heightSize = standardHeight+paddingTop+paddingBottom;
+		} else {
+			heightSize = standardHeight + paddingTop + paddingBottom;
 			rowNum = 1;
 		}
 		setMeasuredDimension(widthMeasureSpec, MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY));
-
-//		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-//		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-//		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-//		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-//
-//		int cnt = null==mAdapter?0:mAdapter.getCount();
-//		for(int i=0; i< cnt; i++){
-//
-//		}
-//
-//
-//		setMeasuredDimension(widthSize, heightSize);
 	}
 
 	@Override
@@ -114,20 +104,20 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 		computeChildPosition();
 
-		int cnt = null==mAdapter?0:mAdapter.getCount();
-		int pageCnt = columnNum*rowNum;
+		int cnt = null == mAdapter ? 0 : mAdapter.getCount();
+		int pageCnt = columnNum * rowNum;
 
-		int pc = cnt/pageCnt;
-		int rest = cnt%pageCnt==0?0:1;
+		int pc = cnt / pageCnt;
+		int rest = cnt % pageCnt == 0 ? 0 : 1;
 		totalPage = pc + rest;
 		int current = 0;
 		int baseWidth = 0;
-		for(int i=0;i < totalPage;i++){
-			current = cnt-(i+1)*pageCnt>=0?pageCnt:cnt-i*pageCnt;
-			for(int j=0;j<current;j++){
-				View v = itemViews.get(j+i*pageCnt);
+		for (int i = 0; i < totalPage; i++) {
+			current = cnt - (i + 1) * pageCnt >= 0 ? pageCnt : cnt - i * pageCnt;
+			for (int j = 0; j < current; j++) {
+				View v = itemViews.get(j + i * pageCnt);
 				Rect rect = itemLocations.get(j);
-				v.layout(baseWidth+rect.left, rect.top, baseWidth+rect.right, rect.bottom);
+				v.layout(baseWidth + rect.left, rect.top, baseWidth + rect.right, rect.bottom);
 			}
 			baseWidth += getMeasuredWidth();
 		}
@@ -141,24 +131,24 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
 
 		int action = ev.getActionMasked();
-		switch (action){
+		switch (action) {
 			case MotionEvent.ACTION_DOWN:
 				pointerId = ev.getPointerId(0);
 				initX = downX = (int) ev.getX();
 				initY = downY = (int) ev.getY();
-				Log.i("wj","on intercept down "+touchSlop);
+				Log.i(TAG, "on intercept down " + touchSlop);
 				break;
 			case MotionEvent.ACTION_MOVE:
 				int p = ev.findPointerIndex(pointerId);
 				cX = (int) ev.getX(p);
 				cY = (int) ev.getY(p);
 				int diffX = cX - downX;
-				Log.i("wj","on intercept move not intercept "+diffX+", cX="+cX+". downX="+downX);
+				Log.i(TAG, "on intercept move not intercept " + diffX + ", cX=" + cX + ". downX=" + downX);
 
-				if( Math.abs(diffX) > touchSlop ){
+				if (Math.abs(diffX) > touchSlop) {
 					initX = downX = (int) ev.getX(p);
 					initY = downY = (int) ev.getY(p);
-					Log.i("wj","on intercept move ");
+					Log.i(TAG, "on intercept move ");
 					return true;
 				}
 				break;
@@ -176,24 +166,31 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		int action = event.getActionMasked();
-		switch (action){
+		switch (action) {
 			case MotionEvent.ACTION_DOWN:
 				pointerId = event.getPointerId(0);
 				initX = downX = (int) event.getX();
 				initY = downY = (int) event.getY();
-				Log.i("wj","on touch down ");
+				Log.i(TAG, "on touch down ");
 				break;
 			case MotionEvent.ACTION_MOVE:
 				int p = event.findPointerIndex(pointerId);
 				cX = (int) event.getX(p);
 				cY = (int) event.getY(p);
 				diffX = cX - downX;
-				if( Math.abs(diffX) > 1 ){
-					scrollTo(currentPage*getWidth()-diffX, 0);
-					Log.i("wj","scroll diffX "+diffX);
+				Log.i(TAG, "currentPage=" + currentPage + ", diffX=" + diffX);
+				if (checkScrollFromMargin()) {
+					break;
+				}
+				if (Math.abs(diffX) > 1) {
+					scrollTo(currentPage * getWidth() - diffX, 0);
+					Log.i(TAG, "scroll diffX " + diffX);
 				}
 				break;
 			case MotionEvent.ACTION_UP:
+				if (checkScrollFromMargin()) {
+					break;
+				}
 				resumeToPage();
 				break;
 			case MotionEvent.ACTION_POINTER_UP:
@@ -205,11 +202,11 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		return true;
 	}
 
-	private void onPointerUp(MotionEvent ev){
+	private void onPointerUp(MotionEvent ev) {
 		int index = ev.getActionIndex();
 		int pi = ev.getPointerId(index);
-		if(pointerId == pi){
-			pointerIndex = index==0?1:0;
+		if (pointerId == pi) {
+			pointerIndex = index == 0 ? 1 : 0;
 			pointerId = ev.getPointerId(pointerIndex);
 			int x = (int) ev.getX(pointerIndex);
 			int y = (int) ev.getY(pointerIndex);
@@ -222,38 +219,39 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	}
 
 
-	private void resumeToPage(){
+	private void resumeToPage() {
 		lastPage = currentPage;
 		int cp = diffX / getWidth();
-		if(cp!= 0){
+		if (cp != 0) {
 			currentPage -= cp;
 			diffX %= getWidth();
 		}
-		Log.d("wj","cp="+cp+", diffX="+diffX);
-		int halfW = (int) (getWidth()/3.5);
-		if(currentPage >= totalPage-1){
-			currentPage = totalPage-1;
-		}else if(currentPage <=0){
+		int halfW = (int) (getWidth() / 3.5);
+		Log.d(TAG, "cp=" + cp + ", diffX=" + diffX + ", getWidth()=" + getWidth()
+				+ ", currentPage=" + currentPage + ", halfW=" + halfW);
+		if (currentPage > totalPage - 1) {
+			currentPage = totalPage - 1;
+		} else if (currentPage < 0) {
 			currentPage = 0;
-		}else{
-			if(diffX + halfW < 0){
+		} else {
+			if (diffX + halfW < 0) {
 				currentPage++;
 			}
-			if( diffX - halfW > 0) {
+			if (diffX - halfW > 0) {
 				currentPage--;
 			}
 		}
 
 
-		smoothScrollToX(currentPage*getWidth());
+		smoothScrollToX(currentPage * getWidth());
 
-		if(currentPage!=lastPage){
+		if (currentPage != lastPage) {
 			dispatchPageChangeEvent(TYPE_PAGE_CHANGED);
 		}
-		Log.d("wj","ready to resume"+currentPage*getWidth());
+		Log.d(TAG, "ready to resume" + currentPage * getWidth());
 	}
 
-	private void smoothScrollToX(int finalX){
+	private void smoothScrollToX(int finalX) {
 		int cx = getScrollX();
 		scroller.startScroll(cx, 0, finalX - cx, 0, ANIMATOR_DURATION);
 		postInvalidate();
@@ -263,7 +261,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	@Override
 	public void computeScroll() {
 		super.computeScroll();
-		if(scroller.computeScrollOffset()){
+		if (scroller.computeScrollOffset()) {
 			scrollTo(scroller.getCurrX(), scroller.getCurrY());
 			postInvalidate();
 		}
@@ -276,16 +274,16 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	@Override
 	public void setAdapter(ListAdapter adapter) {
-		if(null == adapter){
+		if (null == adapter) {
 			return;
 		}
 		super.setAdapter(adapter);
 		refreshGridView();
 	}
 
-	private void refreshGridView(){
+	private void refreshGridView() {
 		int cnt = mAdapter.getCount();
-		if(cnt != itemCount){
+		if (cnt != itemCount) {
 			itemViews.clear();
 			removeAllViews();
 
@@ -295,7 +293,7 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			lp.height = -2;
 //			lp.width = standardWidth;
 //			lp.height = standardHeight;
-			for(int i=0; i<cnt; i++){
+			for (int i = 0; i < cnt; i++) {
 				View v = mAdapter.getView(i, null, this);
 				itemViews.put(i, v);
 				addView(v, lp);
@@ -307,62 +305,62 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}
 	}
 
-	private void resizeViewToStandard(){
+	private void resizeViewToStandard() {
 
 		paddingRight = 20;
 		paddingBottom = 17;
 		itemHorizontalGap = 48;
 		itemVerticalGap = 16;
-		paddingLeft = (getMeasuredWidth() - (itemHorizontalGap+standardWidth)*columnNum+itemHorizontalGap)/2;
-		paddingTop = (getMeasuredHeight() - (itemVerticalGap+standardHeight)*rowNum+itemVerticalGap)/2;
+		paddingLeft = (getMeasuredWidth() - (itemHorizontalGap + standardWidth) * columnNum + itemHorizontalGap) / 2;
+		paddingTop = (getMeasuredHeight() - (itemVerticalGap + standardHeight) * rowNum + itemVerticalGap) / 2;
 	}
 
-	private void computeChildPosition(){
+	private void computeChildPosition() {
 		resizeViewToStandard();
-		int widthExtra = paddingLeft+paddingRight;
-		int heightExtra = paddingTop+paddingBottom;
-		int deltaX=0, deltaY=0;
+		int widthExtra = paddingLeft + paddingRight;
+		int heightExtra = paddingTop + paddingBottom;
+		int deltaX = 0, deltaY = 0;
 		itemLocations.clear();
-		for(int i=0;i<rowNum; i++){
-			for(int j=0;j<columnNum;j++){
+		for (int i = 0; i < rowNum; i++) {
+			for (int j = 0; j < columnNum; j++) {
 				Rect rect = new Rect();
-				rect.left = paddingLeft + (standardWidth+itemHorizontalGap)*j;
-				rect.top = paddingTop + (standardHeight+itemVerticalGap)*i;
+				rect.left = paddingLeft + (standardWidth + itemHorizontalGap) * j;
+				rect.top = paddingTop + (standardHeight + itemVerticalGap) * i;
 				rect.right = rect.left + standardWidth;
 				rect.bottom = rect.top + standardHeight;
 
 //				rect.top = deltaY+heightExtra;
 //				rect.right = deltaX += standardWidth;
 //				rect.bottom = deltaY + standardHeight;
-				itemLocations.put(j+i*columnNum, rect);
+				itemLocations.put(j + i * columnNum, rect);
 			}
 //			deltaY+=heightExtra+standardHeight;
 //			deltaX = 0;
 		}
 	}
 
-	public void setOnItemClickListener(OnItemClickListener listener){
+	public void setOnItemClickListener(OnItemClickListener listener) {
 		this.onItemClickListener = listener;
 	}
 
-	public void setOnItemLongClickListener(OnItemLongClickListener listener){
+	public void setOnItemLongClickListener(OnItemLongClickListener listener) {
 		this.onItemLongClickListener = listener;
 	}
 
 
-	private void initItemEvents(View v, int position){
+	private void initItemEvents(View v, int position) {
 		long id = mAdapter.getItemId(position);
 		setItemViewClickListener(v, position, id);
 		setItemViewLongClickListener(v, position, id);
 	}
 
-	private void setItemViewClickListener(final View target, final int position, final long id){
-		if(null != target){
+	private void setItemViewClickListener(final View target, final int position, final long id) {
+		if (null != target) {
 			target.setTag(position);
 			target.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if(null != onItemClickListener){
+					if (null != onItemClickListener) {
 						onItemClickListener.onItemClick(GridPagerView.this, target, position, id);
 					}
 				}
@@ -370,13 +368,13 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}
 	}
 
-	private void setItemViewLongClickListener(final View target, final int position, final long id){
-		if(null != target){
+	private void setItemViewLongClickListener(final View target, final int position, final long id) {
+		if (null != target) {
 			target.setTag(position);
 			target.setOnLongClickListener(new OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
-					if(null != onItemLongClickListener){
+					if (null != onItemLongClickListener) {
 						onItemLongClickListener.onItemLongClick(GridPagerView.this, target, position, id);
 						return true;
 					}
@@ -386,34 +384,34 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 		}
 	}
 
-	public void setOnPageChangeListener(OnPageChangeListener listener){
-		if(null != listener){
+	public void setOnPageChangeListener(OnPageChangeListener listener) {
+		if (null != listener) {
 			onPageChangeListeners.add(listener);
 		}
 	}
 
-	private void dispatchPageChangeEvent(int type){
-		if(TYPE_PAGE_CHANGED == type){
-			for(OnPageChangeListener l : onPageChangeListeners){
+	private void dispatchPageChangeEvent(int type) {
+		if (TYPE_PAGE_CHANGED == type) {
+			for (OnPageChangeListener l : onPageChangeListeners) {
 				l.onPageSelected(currentPage);
 			}
 		}
-		if( TYPE_DATA_CHANGED == type ) {
-			for(OnPageChangeListener l : onPageChangeListeners){
+		if (TYPE_DATA_CHANGED == type) {
+			for (OnPageChangeListener l : onPageChangeListeners) {
 				l.onPageDataSetChanged(true, currentPage);
 			}
 		}
 	}
 
-	public int getPageCount(){
+	public int getPageCount() {
 		return totalPage;
 	}
 
-	private void checkPageValid(){
-		if(currentPage >= totalPage){
+	private void checkPageValid() {
+		if (currentPage >= totalPage) {
 			currentPage = totalPage - 1;
 		}
-		smoothScrollToX(currentPage*getWidth());
+		smoothScrollToX(currentPage * getWidth());
 	}
 
 	@Override
@@ -428,4 +426,12 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			}
 		}, 300);
 	}
+
+	private boolean checkScrollFromMargin() {
+		if ((diffX < 0 && totalPage - 1 == currentPage) || (0 == currentPage && diffX > 0)) {
+			return true;
+		}
+		return false;
+	}
+
 }
