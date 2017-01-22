@@ -23,6 +23,7 @@ import java.util.List;
 public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 
 	private static final String TAG = "GridPagerView";
+	private static final boolean DEBUG = false;
 
 	private static final int TYPE_PAGE_CHANGED = 1;
 	private static final int TYPE_DATA_CHANGED = 2;
@@ -136,19 +137,24 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 				pointerId = ev.getPointerId(0);
 				initX = downX = (int) ev.getX();
 				initY = downY = (int) ev.getY();
-				Log.i(TAG, "on intercept down " + touchSlop);
+				if(DEBUG){
+					Log.i(TAG, "on intercept down " + touchSlop);
+				}
 				break;
 			case MotionEvent.ACTION_MOVE:
 				int p = ev.findPointerIndex(pointerId);
 				cX = (int) ev.getX(p);
 				cY = (int) ev.getY(p);
 				int diffX = cX - downX;
-				Log.i(TAG, "on intercept move not intercept " + diffX + ", cX=" + cX + ". downX=" + downX);
-
+				if(DEBUG){
+					Log.i(TAG, "on intercept move not intercept " + diffX + ", cX=" + cX + ". downX=" + downX);
+				}
 				if (Math.abs(diffX) > touchSlop) {
 					initX = downX = (int) ev.getX(p);
 					initY = downY = (int) ev.getY(p);
-					Log.i(TAG, "on intercept move ");
+					if(DEBUG){
+						Log.i(TAG, "on intercept move ");
+					}
 					return true;
 				}
 				break;
@@ -166,32 +172,52 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		int action = event.getActionMasked();
+		int tmpDiffX= 0;
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
 				pointerId = event.getPointerId(0);
 				initX = downX = (int) event.getX();
 				initY = downY = (int) event.getY();
-				Log.i(TAG, "on touch down ");
+				if(DEBUG){
+					Log.i(TAG, "on touch down ");
+				}
 				break;
 			case MotionEvent.ACTION_MOVE:
 				int p = event.findPointerIndex(pointerId);
 				cX = (int) event.getX(p);
 				cY = (int) event.getY(p);
+				tmpDiffX = diffX;
 				diffX = cX - downX;
-				Log.i(TAG, "currentPage=" + currentPage + ", diffX=" + diffX);
+				if(DEBUG){
+					Log.i(TAG, "currentPage=" + currentPage + ", diffX=" + diffX + ", getScrollX="+getScrollX());
+				}
 				if (checkScrollFromMargin()) {
 					break;
 				}
-				if (Math.abs(diffX) > 1) {
-					scrollTo(currentPage * getWidth() - diffX, 0);
-					Log.i(TAG, "scroll diffX " + diffX);
+				//if current page is in the middle, but scroll below 0 or over totalPage-1, just check that.
+				//fix BUG: scroll to first/last from other page, and then scroll back.
+				if( (getScrollX() < 0 && diffX > tmpDiffX)
+						|| (getScrollX() > (totalPage-1)*getWidth() && diffX < tmpDiffX)
+						 ){
+					diffX = tmpDiffX;
+				}
+				tmpDiffX = diffX;
+				if (Math.abs(tmpDiffX) > 1) {
+					scrollTo(currentPage * getWidth() - tmpDiffX, 0);
+					if(DEBUG){
+						Log.i(TAG, "scroll diffX " + diffX);
+					}
 				}
 				break;
 			case MotionEvent.ACTION_UP:
 				if (checkScrollFromMargin()) {
 					break;
 				}
-				resumeToPage();
+				if( getScrollX() < 0){
+					Log.d(TAG, "v x is below 0.");
+					setScrollX(0);
+				}
+				resumeToPage(diffX);
 				break;
 			case MotionEvent.ACTION_POINTER_UP:
 				onPointerUp(event);
@@ -215,11 +241,9 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			downX = cX - diffX;
 			downY = cY - diffY;
 		}
-
 	}
 
-
-	private void resumeToPage() {
+	private void resumeToPage(int diffX) {
 		lastPage = currentPage;
 		int cp = diffX / getWidth();
 		if (cp != 0) {
@@ -227,8 +251,10 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			diffX %= getWidth();
 		}
 		int halfW = (int) (getWidth() / 3.5);
-		Log.d(TAG, "cp=" + cp + ", diffX=" + diffX + ", getWidth()=" + getWidth()
-				+ ", currentPage=" + currentPage + ", halfW=" + halfW);
+		if(DEBUG){
+			Log.d(TAG, "cp=" + cp + ", diffX=" + diffX + ", getWidth()=" + getWidth()
+					+ ", currentPage=" + currentPage + ", halfW=" + halfW);
+		}
 		if (currentPage > totalPage - 1) {
 			currentPage = totalPage - 1;
 		} else if (currentPage < 0) {
@@ -242,13 +268,13 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 			}
 		}
 
-
 		smoothScrollToX(currentPage * getWidth());
-
 		if (currentPage != lastPage) {
 			dispatchPageChangeEvent(TYPE_PAGE_CHANGED);
 		}
-		Log.d(TAG, "ready to resume" + currentPage * getWidth());
+		if(DEBUG){
+			Log.d(TAG, "ready to resume" + currentPage * getWidth());
+		}
 	}
 
 	private void smoothScrollToX(int finalX) {
@@ -428,10 +454,10 @@ public class GridPagerView extends CustomLinearLayout<ListAdapter> {
 	}
 
 	private boolean checkScrollFromMargin() {
+		//check if current page is 0 or totalPage-1, then forbid left/right scroll event
 		if ((diffX < 0 && totalPage - 1 == currentPage) || (0 == currentPage && diffX > 0)) {
 			return true;
 		}
 		return false;
 	}
-
 }

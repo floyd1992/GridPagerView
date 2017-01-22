@@ -2,6 +2,8 @@ package com.jyqqhw.gridpagerview;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Point;
@@ -13,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +43,8 @@ public class MainActivity extends Activity {
         initData();
         initView();
 
-        initDialog();
+//        initDialog();
+//        initPeogressDialog();
     }
 
 
@@ -61,6 +65,20 @@ public class MainActivity extends Activity {
             }
         });
         builder.show();
+    }
+
+
+    private void initPeogressDialog(){
+        Dialog dialog = new Dialog(this);
+        ImageView imageView = new ImageView(this);
+        imageView.setImageResource(R.mipmap.ic_launcher);
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.width = -1;
+        lp.height = -1;
+        dialog.setContentView(imageView, lp);
+        dialog.getWindow().setLayout(-1,-1);
+        dialog.show();
     }
 
 
